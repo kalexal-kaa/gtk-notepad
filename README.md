@@ -1,4 +1,5 @@
 # gtk-notepad
+Simple gtk-notepad
 
 ![][logo]
 
