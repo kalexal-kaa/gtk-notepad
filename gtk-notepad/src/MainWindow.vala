@@ -40,7 +40,7 @@ private int mode;
         toolbar_list_page.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
         var add_icon = new Gtk.Image.from_icon_name ("document-new", IconSize.SMALL_TOOLBAR);
         var view_icon = new Gtk.Image.from_icon_name ("document-open", IconSize.SMALL_TOOLBAR);
-        var edit_icon = new Gtk.Image.from_icon_name ("document-properties", IconSize.SMALL_TOOLBAR);
+        var edit_icon = new Gtk.Image.from_icon_name ("accessories-text-editor", IconSize.SMALL_TOOLBAR);
         var delete_icon = new Gtk.Image.from_icon_name ("edit-delete", IconSize.SMALL_TOOLBAR);
         var add_button = new Gtk.ToolButton (add_icon, "Add New");
         add_button.is_important = true;
