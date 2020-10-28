@@ -5,7 +5,7 @@ namespace Notepad {
         public MainWindow app_window;
 
         public Application() {
-            Object(flags: ApplicationFlags.FLAGS_NONE, application_id: "com.github.kalexal-kaa.gtk-notepad");
+            Object(flags: ApplicationFlags.FLAGS_NONE, application_id: "com.github.alexkdeveloper.nottist");
         }
 
         protected override void activate() {

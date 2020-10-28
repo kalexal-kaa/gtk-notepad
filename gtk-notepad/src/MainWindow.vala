@@ -16,6 +16,15 @@ private GLib.List<string> list;
 private TextView text_view;
 private TextView view;
 private Entry entry_name;
+private Button back_button_view_page;
+private Button back_button_edit_page;
+private Button back_button_name_page;
+private Button delete_button;
+private Button edit_button;
+private Button save_button;
+private Button clear_button;
+private Button add_button;
+private Button view_button;
 private string directory_path;
 private string note_name;
 private string item;
@@ -23,41 +32,78 @@ private int mode;
 
         public MainWindow(Gtk.Application application) {
             GLib.Object(application: application,
-                         title: "Notepad",
+                         title: "Nottist",
                          window_position: WindowPosition.CENTER,
                          resizable: true,
-                         height_request: 350,
-                         width_request: 450,
+                         height_request: 450,
+                         width_request: 550,
                          border_width: 10);
         }        
 
         construct {        
-          stack = new Stack();
-          stack.set_transition_duration (600);
-          stack.set_transition_type (StackTransitionType.SLIDE_LEFT_RIGHT);
-          add (stack);
-        var toolbar_list_page = new Toolbar ();
-        toolbar_list_page.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
-        var add_icon = new Gtk.Image.from_icon_name ("document-new", IconSize.SMALL_TOOLBAR);
-        var view_icon = new Gtk.Image.from_icon_name ("document-open", IconSize.SMALL_TOOLBAR);
-        var edit_icon = new Gtk.Image.from_icon_name ("accessories-text-editor", IconSize.SMALL_TOOLBAR);
-        var delete_icon = new Gtk.Image.from_icon_name ("edit-delete", IconSize.SMALL_TOOLBAR);
-        var add_button = new Gtk.ToolButton (add_icon, "Add New");
-        add_button.is_important = true;
-        var view_button = new Gtk.ToolButton (view_icon, "View");
-        view_button.is_important = true;
-        var edit_button = new Gtk.ToolButton (edit_icon, "Edit");
-        edit_button.is_important = true;
-        var delete_button = new Gtk.ToolButton (delete_icon, "Delete");
-        delete_button.is_important = true;
-        toolbar_list_page.add(add_button);
-        toolbar_list_page.add(view_button);
-        toolbar_list_page.add(edit_button);
-        toolbar_list_page.add(delete_button);
+        Gtk.HeaderBar headerbar = new Gtk.HeaderBar();
+        headerbar.get_style_context().add_class(Gtk.STYLE_CLASS_FLAT);
+        headerbar.show_close_button = true;
+        set_titlebar(headerbar);
+        back_button_view_page = new Gtk.Button ();
+            back_button_view_page.set_image (new Gtk.Image.from_icon_name ("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            back_button_view_page.vexpand = false;
+        back_button_edit_page = new Gtk.Button ();
+            back_button_edit_page.set_image (new Gtk.Image.from_icon_name ("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            back_button_edit_page.vexpand = false;
+        back_button_name_page = new Gtk.Button();
+            back_button_name_page.set_image (new Gtk.Image.from_icon_name ("go-previous-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            back_button_name_page.vexpand = false;
+        add_button = new Gtk.Button ();
+            add_button.set_image (new Gtk.Image.from_icon_name ("document-new-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            add_button.vexpand = false;
+        view_button = new Gtk.Button ();
+            view_button.set_image (new Gtk.Image.from_icon_name ("document-open-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            view_button.vexpand = false;
+        delete_button = new Gtk.Button ();
+            delete_button.set_image (new Gtk.Image.from_icon_name ("edit-delete-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            delete_button.vexpand = false;
+        edit_button = new Gtk.Button ();
+            edit_button.set_image (new Gtk.Image.from_icon_name ("document-edit-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            edit_button.vexpand = false;
+        save_button = new Gtk.Button();
+            save_button.set_image (new Gtk.Image.from_icon_name ("document-save-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            save_button.vexpand = false;
+        clear_button = new Gtk.Button();
+            clear_button.set_image (new Gtk.Image.from_icon_name ("edit-clear-symbolic", Gtk.IconSize.SMALL_TOOLBAR));
+            clear_button.vexpand = false;  
+            back_button_view_page.set_tooltip_text("back");
+            back_button_edit_page.set_tooltip_text("back");
+            back_button_name_page.set_tooltip_text("back");
+            delete_button.set_tooltip_text("delete");
+            edit_button.set_tooltip_text("edit");
+            save_button.set_tooltip_text("save");
+            clear_button.set_tooltip_text("clear");
+            view_button.set_tooltip_text("open");
+            add_button.set_tooltip_text("add");
+        headerbar.add(back_button_view_page);
+        headerbar.add (back_button_edit_page);
+        headerbar.add (back_button_name_page);
+        headerbar.add(add_button);
+        headerbar.add(view_button);
+        headerbar.add(edit_button);
+        headerbar.add(delete_button);
+        headerbar.add (save_button);
+        headerbar.add (clear_button);
         add_button.clicked.connect(on_add_clicked);
         delete_button.clicked.connect (on_delete_clicked);
         edit_button.clicked.connect(on_edit_clicked);
         view_button.clicked.connect(on_view_clicked);
+        back_button_name_page.clicked.connect(go_to_list_page);
+        back_button_edit_page.clicked.connect (go_to_name_page);
+        back_button_view_page.clicked.connect(go_to_list_page);
+        save_button.clicked.connect (on_save_clicked);
+        clear_button.clicked.connect (on_clear_clicked);
+        set_buttons_on_list_page();
+          stack = new Stack();
+          stack.set_transition_duration (600);
+          stack.set_transition_type (StackTransitionType.SLIDE_LEFT_RIGHT);
+          add (stack);
    list_store = new Gtk.ListStore(Columns.N_COLUMNS, typeof(string));
            tree_view = new TreeView.with_model(list_store);
            var text = new CellRendererText ();
@@ -71,11 +117,10 @@ private int mode;
         scroll_list_page.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
         scroll_list_page.add (this.tree_view);
    vbox_list_page = new Box(Orientation.VERTICAL,20);
-   vbox_list_page.pack_start(toolbar_list_page,false,true,0);
    vbox_list_page.pack_start(scroll_list_page,true,true,0);
    stack.add(vbox_list_page);
         entry_name = new Entry();
-        entry_name.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear");
+        entry_name.set_icon_from_icon_name (Gtk.EntryIconPosition.SECONDARY, "edit-clear-symbolic");
         entry_name.icon_press.connect ((pos, event) => {
         if (pos == Gtk.EntryIconPosition.SECONDARY) {
             entry_name.set_text ("");
@@ -87,30 +132,10 @@ private int mode;
         hbox_name.pack_start (entry_name, true, true, 0);
         var button_ok = new Button.with_label("OK");
         button_ok.clicked.connect(on_ok_clicked);
-        var button_back = new Button.with_label("<<< BACK");
-        button_back.clicked.connect(go_to_list_page);
         vbox_name_page = new Box(Orientation.VERTICAL,20);
-        vbox_name_page.pack_start(button_back,false,true,0);
         vbox_name_page.pack_start(hbox_name,false,true,0);
         vbox_name_page.pack_start(button_ok,false,true,0);
         stack.add(vbox_name_page);
-        var toolbar_edit_page = new Toolbar ();
-        toolbar_edit_page.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
-        var back_icon = new Gtk.Image.from_icon_name ("go-previous", IconSize.SMALL_TOOLBAR);
-        var save_icon = new Gtk.Image.from_icon_name ("document-save", IconSize.SMALL_TOOLBAR);
-        var clear_icon = new Gtk.Image.from_icon_name ("edit-clear", IconSize.SMALL_TOOLBAR);
-        var back_button = new Gtk.ToolButton (back_icon, "Back");
-        back_button.is_important = true;
-        var save_button = new Gtk.ToolButton (save_icon, "Save");
-        save_button.is_important = true;
-        var clear_button = new Gtk.ToolButton (clear_icon, "Clear");
-        clear_button.is_important = true;
-        toolbar_edit_page.add (back_button);
-        toolbar_edit_page.add (save_button);
-        toolbar_edit_page.add (clear_button);
-        back_button.clicked.connect (go_to_name_page);
-        save_button.clicked.connect (on_save_clicked);
-        clear_button.clicked.connect (on_clear_clicked);
         this.text_view = new TextView ();
         this.text_view.editable = true;
         this.text_view.cursor_visible = true;
@@ -119,16 +144,8 @@ private int mode;
         scroll_edit_page.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
         scroll_edit_page.add (this.text_view);
         vbox_edit_page = new Box (Orientation.VERTICAL, 0);
-        vbox_edit_page.pack_start (toolbar_edit_page, false, true, 0);
         vbox_edit_page.pack_start (scroll_edit_page, true, true, 0);
         stack.add(vbox_edit_page);
-        var toolbar_view_page = new Toolbar ();
-        toolbar_view_page.get_style_context ().add_class (STYLE_CLASS_PRIMARY_TOOLBAR);
-        var go_to_list_page_icon = new Gtk.Image.from_icon_name ("go-previous", IconSize.SMALL_TOOLBAR);
-        var go_to_list_page_button = new Gtk.ToolButton (go_to_list_page_icon, "Back");
-        go_to_list_page_button.is_important = true;
-        toolbar_view_page.add(go_to_list_page_button);
-        go_to_list_page_button.clicked.connect(go_to_list_page);
         this.view = new TextView ();
         this.view.editable = false;
         this.view.cursor_visible = false;
@@ -137,7 +154,6 @@ private int mode;
         scroll_view_page.set_policy (PolicyType.AUTOMATIC, PolicyType.AUTOMATIC);
         scroll_view_page.add (this.view);
         vbox_view_page = new Box(Orientation.VERTICAL,20);
-        vbox_view_page.pack_start(toolbar_view_page,false,true,0);
         vbox_view_page.pack_start(scroll_view_page,true,true,0);
         stack.add(vbox_view_page);
         stack.visible_child = vbox_list_page;
@@ -155,6 +171,7 @@ private int mode;
    
    private void on_add_clicked(){
         stack.visible_child = vbox_name_page;
+        set_buttons_on_name_page();
         entry_name.set_text(date_time());
         mode = 1;
    }
@@ -169,6 +186,7 @@ private int mode;
                return;
            }
         stack.visible_child = vbox_name_page;
+        set_buttons_on_name_page();
         entry_name.set_text(item);
         mode = 0;
    }
@@ -199,10 +217,12 @@ private int mode;
    
    private void go_to_list_page(){
         stack.visible_child = vbox_list_page;
+        set_buttons_on_list_page();
    }
    
    private void go_to_name_page(){
         stack.visible_child = vbox_name_page;
+        set_buttons_on_name_page();
    }
    
    private void on_view_clicked(){
@@ -215,6 +235,7 @@ private int mode;
                return;
            }
         stack.visible_child = vbox_view_page;
+        set_buttons_on_view_page();
         string text;
             try {
                 FileUtils.get_contents (directory_path+"/"+item, out text);
@@ -284,6 +305,7 @@ private int mode;
                 }
             }
             stack.visible_child = vbox_edit_page;
+            set_buttons_on_edit_page();
             string text;
             try {
                 FileUtils.get_contents (directory_path+"/"+note_name, out text);
@@ -300,6 +322,7 @@ private int mode;
             return;
         }
         stack.visible_child = vbox_edit_page;
+        set_buttons_on_edit_page();
         if(!is_empty(text_view.buffer.text)){
               text_view.buffer.text = "";
         }
@@ -353,6 +376,59 @@ private int mode;
          var now = new DateTime.now_local ();
          return now.format("%x  %X");
     }
+    
+    private void set_widget_visible (Gtk.Widget widget, bool visible) {
+         widget.no_show_all = !visible;
+         widget.visible = visible;
+  }
+       
+       private void set_buttons_on_edit_page(){
+       set_widget_visible(back_button_view_page,false);
+       set_widget_visible(back_button_edit_page,true);
+       set_widget_visible(back_button_name_page,false);
+       set_widget_visible(save_button,true);
+       set_widget_visible(delete_button,false);
+       set_widget_visible(edit_button,false);
+       set_widget_visible(clear_button,true);
+       set_widget_visible(add_button,false);
+       set_widget_visible(view_button,false);
+   }
+       
+       private void set_buttons_on_list_page(){
+       set_widget_visible(back_button_view_page,false);
+       set_widget_visible(back_button_edit_page,false);
+       set_widget_visible(back_button_name_page,false);
+       set_widget_visible(save_button,false);
+       set_widget_visible(delete_button,true);
+       set_widget_visible(edit_button,true);
+       set_widget_visible(clear_button,false);
+       set_widget_visible(add_button,true);
+       set_widget_visible(view_button,true);
+       }
+       
+       private void set_buttons_on_view_page(){
+       set_widget_visible(back_button_view_page,true);
+       set_widget_visible(back_button_edit_page,false);
+       set_widget_visible(back_button_name_page,false);
+       set_widget_visible(save_button,false);
+       set_widget_visible(delete_button,false);
+       set_widget_visible(edit_button,false);
+       set_widget_visible(clear_button,false);
+       set_widget_visible(add_button,false);
+       set_widget_visible(view_button,false);
+       }
+       
+       private void set_buttons_on_name_page(){
+       set_widget_visible(back_button_view_page,false);
+       set_widget_visible(back_button_edit_page,false);
+       set_widget_visible(back_button_name_page,true);
+       set_widget_visible(save_button,false);
+       set_widget_visible(delete_button,false);
+       set_widget_visible(edit_button,false);
+       set_widget_visible(clear_button,false);
+       set_widget_visible(add_button,false);
+       set_widget_visible(view_button,false);
+       }
     
     private void alert (string str){
           var dialog_alert = new Gtk.MessageDialog(this, Gtk.DialogFlags.MODAL, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, str);
